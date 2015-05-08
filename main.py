@@ -31,7 +31,10 @@ for key, group in itertools.groupby(sorted_data, lambda item: item["Department"]
 	data_cleared[key] = [item for item in group]
 # COMMENT: data_cleared is a dict in which every key is a unique department  
 #  name and value is a list of all people who work in that department
-print len(data_cleared['Geography'])
+print data_cleared['Geography']
+
+with open('result.json', 'w') as fp:
+    json.dump(data_cleared['Geography'], fp)
 
 
 
