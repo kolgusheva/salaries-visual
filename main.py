@@ -2,6 +2,7 @@ import json
 import itertools
 from operator import itemgetter
 import numpy
+import math
 
 with open('data.json') as f:
     data = json.loads(f.read())
@@ -47,8 +48,9 @@ def getMeanHighest(stream):
 	highest = []
 	for x in stream:
 		rate = float(x["Rate"].replace("$", "").replace(",", ""))
-		highest.append(rate)
-		total = total + rate
+		if rate > 1000.00:
+			highest.append(rate)
+			total = total + rate
 	people = len(stream)
 	mean = total / people
 	real_highest = max(highest)

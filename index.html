@@ -4,25 +4,61 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 	<script src="http://code.highcharts.com/highcharts.js"></script>
 	<script src="http://code.highcharts.com/modules/exporting.js"></script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 </head>
 
 <style type="text/css">
 
 #dots {
 	min-width: 310px;
-	height: 400px; 
-	max-width: 800px; 
-	margin: 0 auto;
+	height: 700px; 
+	max-width: 100%; 
+	margin: 0;
+}
+.my-custom-tip {
+	min-width: 250px !important;
+}
+
+.my-custom-tip thead tr {
+	text-align: center;
+}
+
+.my-custom-tip tbody tr td:nth-child(even) {
+	text-align: right;
 }
 
 </style>
 
 <body>
 
-<h3>Hi!</h3>
 
-<div id='dots'></div>
 
+<div class="container">
+
+      <div class="page-header">
+        <h1>Charting MU Salaries</h1>
+        <p class="lead">A visualization of the University of Missouri payroll data for 2013-2014 school year.</p>
+      </div>
+
+      <div id='dots'></div>
+      <hr>
+
+      <h3>About this dataset</h3>
+      <p>MU salaries database contains data about all individuals who work at MU. The original json file contains over 17000 entries. Searchable database can be found <a href="http://media.columbiamissourian.com/multimedia/2014/10/02/media/salaries-database/index.html">here</a>.</p>
+      <div class="row">
+        <div class="col-md-4">
+        	<h3><strong>Challenge</strong></h3>
+        	<strong>The dataset comes as a json file of raw data. The field "Rate" has mixed data about yearly pay as long as hourly pay. The dataset also contains awkward entries of people who received around a thousand dollars last year. The main challenge is to clear this data and make sense of it.</strong></div>
+        <div class="col-md-8">
+        	<h3>Solution</h3>
+        	The data was cleared with Python and saved as a news json file in accessible for Highcharts.js format. The Python program sorts out the data by department. Then, it calculates arithmetic mean and the highest salary for each department, changing these variables to floats first and to integers for the final dictionary. The program also gets rid of entries that are less than 1000 dollars. The chart above shows how the higest payed jobs in the university correlate with average salaries.</div>
+      </div>
+
+      <hr>
+
+    </div> <!-- /container -->
 
 
 <script>
@@ -31,23 +67,87 @@
 
 	$.getJSON( "result.json", function(data) {
 
-		console.log(data);
+		Highcharts.theme = {
+			colors: ["#7cb5ec", "#f7a35c", "#90ee7e", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee",
+				"#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+			chart: {
+				backgroundColor: null,
+				style: {
+					fontFamily: "Dosis, sans-serif"
+				}
+			},
+			title: {
+				style: {
+					fontSize: '16px',
+					fontWeight: 'bold',
+					textTransform: 'uppercase'
+				}
+			},
+			tooltip: {
+				borderWidth: 0,
+				backgroundColor: 'rgba(219,219,216,0.8)',
+				shadow: false
+			},
+			legend: {
+				itemStyle: {
+					fontWeight: 'bold',
+					fontSize: '13px'
+				}
+			},
+			xAxis: {
+				gridLineWidth: 1,
+				labels: {
+					style: {
+						fontSize: '12px'
+					}
+				}
+			},
+			yAxis: {
+				minorTickInterval: 'auto',
+				title: {
+					style: {
+						textTransform: 'uppercase'
+					}
+				},
+				labels: {
+					style: {
+						fontSize: '12px'
+					}
+				}
+			},
+			plotOptions: {
+				candlestick: {
+					lineColor: '#404048'
+				}
+			},
+
+
+			// General
+			background2: '#F0F0EA'
+			
+		};
+
+// Apply the theme
+Highcharts.setOptions(Highcharts.theme);
+
+
 
 	    $('#dots').highcharts({
 	        chart: {
 	            type: 'scatter',
 	            zoomType: 'xy'
+
 	        },
 	        title: {
-	            text: 'Height Versus Weight of 507 Individuals by Gender'
+	            text: 'MAX YEARLY SALARY VS. AVERAGE YEARLY SALARY BY DEPARTMENT'
 	        },
 	        subtitle: {
-	            text: 'Source: Heinz  2003'
+	            text: 'Source: MU InfoPoint'
 	        },
 	        xAxis: {
 	            title: {
 	                enabled: true,
-	                text: 'Height (cm)'
+	                text: 'Max yearly salary in a given department, $'
 	            },
 	            startOnTick: true,
 	            endOnTick: true,
@@ -55,10 +155,11 @@
 	        },
 	        yAxis: {
 	            title: {
-	                text: 'Weight (kg)'
+	                text: 'Average salary in a given department, $'
 	            }
 	        },
 	        legend: {
+	        	enabled: false,
 	            layout: 'vertical',
 	            align: 'left',
 	            verticalAlign: 'top',
@@ -82,23 +183,57 @@
 	                states: {
 	                    hover: {
 	                        marker: {
-	                            enabled: false
+	                            enabled: true
 	                        }
 	                    }
 	                },
-	                tooltip: {
-	                    // headerFormat: false,
-	                    pointFormatter: function(){
-	                    	console.log(this);
-	                    	return this.name;
-	                    }
-	                    // 
-	                }
 	            }
 	        },
+			tooltip: {
+				useHTML: true,
+				hideDelay: 100,
+				positioner: function(){
+					return {
+						x: 80,
+						y: 30
+					}
+				},
+				formatter: function(){
+
+	                    	var content = "<table class='table my-custom-tip'>"+
+	                    						"<thead>"+
+													"<tr>"+
+														"<td colspan='2'><b>Department<b></td>"+
+													"</tr>"+
+													"<tr>"+
+														"<td colspan='2'>"+this.key+"</td>"+
+													"</tr>"+
+	                    						"</thead>"+
+												"<tr>"+
+													"<td><b>Max: </b></td>"+
+													"<td>$"+this.x.toLocaleString()+"</td>"+
+												"</tr>"+
+												"<tr>"+
+													"<td><b>Average: </b></td>"+
+													"<td>$"+this.y.toLocaleString()+"</td>"+
+												"</tr>"+
+	                    				  "</table>";
+
+
+
+					// var content = "<b>Department: </b>"+this.key+"<br />"+
+					// 			  "<span style='text-align: center;'> - </span><br />"+
+					// 			  "<b>Max: </b>"+ this.x +"<br />"+
+					// 			  "<b>Min: </b></td><td>"+ this.y +"<br />";
+
+					return content;
+
+				}
+			},
 	        series: [{
 	            color: 'rgba(223, 83, 83, .5)',
-	            data: data
+	            data: data,
+	            name: "Department:"
 	        }]
 	    });
 
